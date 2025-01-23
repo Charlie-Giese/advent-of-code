@@ -1,0 +1,3 @@
+[submodule "helper/c++/my-clib"]
+	path = helper/c++/my-clib
+	url = https://github.com/Charlie-Giese/my-clib
