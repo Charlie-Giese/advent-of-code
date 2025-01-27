@@ -7,7 +7,8 @@
 class Helper {
     public:
         
-        std::string get_input_path(const char id);
+        std::string get_input_path(const char* id);
+        static char* fetch_line(const char* filename, int* lineno);
 };
 
 #endif

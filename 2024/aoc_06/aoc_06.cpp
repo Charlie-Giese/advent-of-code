@@ -1,7 +1,6 @@
 #include <iostream>
 #include <tuple>
 #include <stdlib.h>
-#include "../../helper/c++/my-clib/fetch_line/fetch-line.h"
 #include "../../helper/c++/helper.hpp"
 
 #define BUFLEN 200
@@ -28,7 +27,7 @@ struct MyGrid {
 
 };
 
-std::tuple<int, int> get_size(const char id, Helper helper) {
+std::tuple<int, int> get_size(const char* id, Helper helper) {
 
     FILE* fp;
     int rows = 0;
@@ -39,8 +38,7 @@ std::tuple<int, int> get_size(const char id, Helper helper) {
     std::make_tuple(rows, columns);
 
     std::string filepath = helper.get_input_path(id);
-
-    fp = fopen(filepath, "r");
+    fp = fopen(filepath.c_str(), "r");
     if (fp == NULL) {
         printf("cannot open file\n");
         fclose(fp);
@@ -62,24 +60,29 @@ std::tuple<int, int> get_size(const char id, Helper helper) {
     return result;
 }
 
-void load_grid(const char* filepath, MyGrid g) {
+MyGrid load_grid(const char* file_id, Helper helper) {
     
+    std::tuple<int, int> size = get_size(file_id, helper);
+
+    MyGrid grid(std::get<0>(size), std::get<1>(size));
+        
+    std::string filepath = helper.get_input_path(file_id);
+
     char buf[BUFLEN];
     char *s;
     int lineno = 0;
-    while ((s = fetch_line(buf, BUFLEN, stdin, &lineno)) != NULL) {
+    while (s = helper.fetch_line(filepath.c_str(), &lineno)) {
         printf("trimmed line %3d: %s\n", lineno, s);
     }
+
+    return grid;
 }
 
 int main() {
     
     Helper helper;
 
-    std::tuple<int, int> size = get_size("aoc_2024_06", helper);
-
-    //MyGrid grid(std::get<0>(size), std::get<1>(size));
-
+    MyGrid grid = load_grid("aoc_2024_06", helper);
 
     return 0;
 }
