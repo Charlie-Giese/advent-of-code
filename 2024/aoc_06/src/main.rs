@@ -58,65 +58,83 @@ impl Grid {
         self.current_direction = self.current_direction.turn();
     }
 
+    fn validate_position(&self, &position: &(i32, i32)) -> bool {
+        position.0 >= 0 && position.1 >= 0 && position.0 <= self.nrows && position.1 <= self.ncols
+    }
+
+    fn change_position(&mut self, position: (i32, i32)) {
+        if self.validate_position(&position) {
+            self.current_position = position;
+        } else {
+            println!("Could not change current position to ({:?})", position);
+        }
+    }
+
+    fn set_position(&mut self, coord: (i32, i32), symb: char) {
+        if self.validate_position(&coord) {
+            self.map[coord.0 as usize][coord.1 as usize] = symb;
+        } else {
+            println!("Coordinate not valid... ({:?})", coord);
+        }
+    }
+
+    fn advance(&mut self) {
+        let x = self.current_position.0;
+        let y = self.current_position.1;
+
+        self.set_position((x, y), 'X');
+
+        match self.current_direction {
+            Direction::North => {
+                if self.map[x as usize - 1][y as usize] == '#'
+                    || self.map[x as usize - 1][y as usize] == 'O'
+                {
+                    self.turn_direction();
+                    self.change_position((x, y + 1));
+                } else {
+                    self.change_position((x - 1, y));
+                }
+            }
+            Direction::East => {
+                if self.map[x as usize][y as usize + 1] == '#'
+                    || self.map[x as usize][y as usize + 1] == 'O'
+                {
+                    self.turn_direction();
+                    self.change_position((x + 1, y));
+                } else {
+                    self.change_position((x, y + 1));
+                }
+            }
+            Direction::South => {
+                if self.map[x as usize + 1][y as usize] == '#'
+                    || self.map[x as usize + 1][y as usize] == 'O'
+                {
+                    self.turn_direction();
+                    self.change_position((x, y - 1));
+                } else {
+                    self.change_position((x + 1, y));
+                }
+            }
+            Direction::West => {
+                if self.map[x as usize][y as usize - 1] == '#'
+                    || self.map[x as usize][y as usize - 1] == 'O'
+                {
+                    self.turn_direction();
+                    self.change_position((x - 1, y));
+                } else {
+                    self.change_position((x, y - 1));
+                }
+            }
+        }
+    }
+
     fn solve(&mut self) -> Option<usize> {
         while self.current_position.0 > 0
             && self.current_position.0 < self.nrows - 1
             && self.current_position.1 > 0
             && self.current_position.1 < self.ncols - 1
         {
-            println!("{:?}", self.current_position);
-            println!("{:?}", self.current_direction);
-            println!(
-                "{:?}",
-                self.map[self.current_position.0 as usize][self.current_position.1 as usize]
-            );
-            self.map[self.current_position.0 as usize][self.current_position.1 as usize] = 'X';
-            match self.current_direction {
-                Direction::North => {
-                    if self.map[self.current_position.0 as usize - 1]
-                        [self.current_position.1 as usize]
-                        == '#'
-                    {
-                        self.turn_direction();
-                        self.current_position.1 += 1;
-                    } else {
-                        self.current_position.0 += -1;
-                    }
-                }
-                Direction::East => {
-                    if self.map[self.current_position.0 as usize]
-                        [self.current_position.1 as usize + 1]
-                        == '#'
-                    {
-                        self.turn_direction();
-                        self.current_position.0 += 1;
-                    } else {
-                        self.current_position.1 += 1;
-                    }
-                }
-                Direction::South => {
-                    if self.map[self.current_position.0 as usize + 1]
-                        [self.current_position.1 as usize]
-                        == '#'
-                    {
-                        self.turn_direction();
-                        self.current_position.1 += -1;
-                    } else {
-                        self.current_position.0 += 1;
-                    }
-                }
-                Direction::West => {
-                    if self.map[self.current_position.0 as usize]
-                        [self.current_position.1 as usize - 1]
-                        == '#'
-                    {
-                        self.turn_direction();
-                        self.current_position.0 += -1;
-                    } else {
-                        self.current_position.1 += -1;
-                    }
-                }
-            }
+            self.advance();
         }
         let count = self
             .map
